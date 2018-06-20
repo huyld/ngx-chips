@@ -1,5 +1,6 @@
 <!-- MENU -->
 <div class='ng2-dropdown-menu ng2-dropdown-menu---width--{{ width }}'
+     [class.ng2-dropdown-menu--init-updated]="onInitUpdated"
      [class.ng2-dropdown-menu--inside-element]="!appendToBody"
      [class.ng2-dropdown-menu--open]="state.menuState.isVisible"
      [@fade]="state.menuState.toString()">

@@ -19,6 +19,8 @@ import { Ng2MenuItem } from '../menu-item/ng2-menu-item';
 import { DropdownStateService } from '../../services/dropdown-state.service';
 import { ViewportRuler } from '../../services/viewport-ruler';
 
+const noop: Function = () => {};
+
 @Component({
     selector: 'ng2-dropdown-menu',
     styleUrls: [ './style.scss' ],
@@ -86,7 +88,7 @@ export class Ng2DropdownMenu {
             return 0;
         }
         const v = this.offset.split(' ', 2).shift();
-        return parseInt(v.replace('px', ''), 10);
+        return parseInt(v!.replace('px', ''), 10);
     }
 
     public get offsetY(): number {
@@ -94,7 +96,7 @@ export class Ng2DropdownMenu {
             return 0;
         }
         const v = this.offset.split(' ', 2).pop();
-        return parseInt(v.replace('px', ''), 10);
+        return parseInt(v!.replace('px', ''), 10);
     }
 
     /**
@@ -111,9 +113,11 @@ export class Ng2DropdownMenu {
 
     private position: ClientRect;
 
+    public onInitUpdated = false;
+
     private listeners = {
-        arrowHandler: undefined,
-        handleKeypress: undefined
+        arrowHandler: noop,
+        handleKeypress: noop
     };
 
     constructor(public state: DropdownStateService,
@@ -133,7 +137,9 @@ export class Ng2DropdownMenu {
         this.state.menuState.isVisible = true;
 
         // setting handlers
-        this.listeners.handleKeypress = this.renderer.listen(dc.body, 'keydown', this.handleKeypress.bind(this));
+        if (dc !== undefined) {
+            this.listeners.handleKeypress = this.renderer.listen(dc.body, 'keydown', this.handleKeypress.bind(this));
+        }
         this.listeners.arrowHandler = this.renderer.listen(wd, 'keydown', arrowKeysHandler);
     }
 
@@ -148,8 +154,8 @@ export class Ng2DropdownMenu {
         this.state.dropdownState.unselect();
 
         // call function to unlisten
-        this.listeners.arrowHandler ? this.listeners.arrowHandler() : undefined;
-        this.listeners.handleKeypress ? this.listeners.handleKeypress() : undefined;
+        this.listeners.arrowHandler();
+        this.listeners.handleKeypress();
     }
 
     /**
@@ -192,7 +198,7 @@ export class Ng2DropdownMenu {
      * @param rect
      * @returns {{top: string, left: string}}
      */
-    private calcPositionOffset(rect): { top: string, left: string } {
+    public calcPositionOffset(rect): { top: string, left: string } {
         const vRect = this.viewportRuler.getViewportRect();
 
         const top = (this.appendToBody ? vRect.top : 0) + rect.top;
@@ -231,7 +237,7 @@ export class Ng2DropdownMenu {
 
     public ngOnInit() {
         const dc = typeof document !== 'undefined' ? document : undefined;
-        if (this.appendToBody) {
+        if (this.appendToBody && dc !== undefined) {
             // append menu element to the body
             dc.body.appendChild(this.element.nativeElement);
         }
@@ -239,14 +245,6 @@ export class Ng2DropdownMenu {
 
     public ngDoCheck() {
         if (this.state.menuState.isVisible && this.position) {
-            const element = this.getMenuElement();
-            const position = this.calcPositionOffset(this.position);
-
-            if (position) {
-                this.renderer.setElementStyle(element, 'top', position.top);
-                this.renderer.setElementStyle(element, 'left', position.left);
-            }
-
             // select first item unless user disabled this option
             if (this.focusFirstElement &&
                 this.items.first &&

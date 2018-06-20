@@ -37,6 +37,6 @@ export class Ng2DropdownState {
      * @desc sets _selectedItem as undefined
      */
     public unselect(): void {
-        this._selectedItem = undefined;
+        delete this._selectedItem;
     }
 }

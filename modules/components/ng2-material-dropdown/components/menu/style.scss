@@ -19,6 +19,9 @@
 .ng2-dropdown-menu.ng2-dropdown-menu--inside-element {
     position: fixed;
 }
+.ng2-dropdown-menu.ng2-dropdown-menu--inside-element {
+    visibility: visible;
+}
 
 .ng2-dropdown-menu.ng2-dropdown-menu--width--2 {
     width: 200px;
